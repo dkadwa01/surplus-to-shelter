@@ -11,3 +11,4 @@ database/*.db
 database/*.db-journal
 src/backend/generated/
 *.tsbuildinfo
+node_modules

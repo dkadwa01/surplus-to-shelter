@@ -14,7 +14,11 @@
                     "build":  "npm run build --workspace @surplus/shared \u0026\u0026 npm run build --workspace @surplus/backend \u0026\u0026 npm run build --workspace @surplus/frontend",
                     "typecheck":  "npm run build --workspace @surplus/shared \u0026\u0026 npm run typecheck --workspace @surplus/shared \u0026\u0026 npm run typecheck --workspace @surplus/backend \u0026\u0026 npm run typecheck --workspace @surplus/frontend",
                     "prisma:generate":  "prisma generate --schema database/schema.prisma",
-                    "prisma:validate":  "prisma validate --schema database/schema.prisma"
+                    "prisma:validate":  "prisma validate --schema database/schema.prisma",
+                    "db:migrate":  "node database/prepare-sqlite.mjs \u0026\u0026 prisma migrate dev --schema database/schema.prisma",
+                    "db:deploy":  "node database/prepare-sqlite.mjs \u0026\u0026 prisma migrate deploy --schema database/schema.prisma",
+                    "test":  "npm run build --workspace @surplus/shared \u0026\u0026 npm run build --workspace @surplus/backend \u0026\u0026 npm run db:deploy \u0026\u0026 npm --workspace @surplus/backend run test",
+                    "auth:bootstrap-admin":  "npm run build --workspace @surplus/shared \u0026\u0026 npm run build --workspace @surplus/backend \u0026\u0026 node src/backend/scripts/bootstrap-admin.mjs"
                 },
     "devDependencies":  {
                             "concurrently":  "^9.2.1",
