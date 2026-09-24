@@ -68,6 +68,22 @@ h1 { margin: 18px 0; font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.02; let
 .donation-detail dl { display: grid; grid-template-columns: 150px 1fr; gap: 13px; line-height: 1.5; margin: 28px 0; }
 .donation-detail dt { color: var(--muted); font-weight: 650; }
 .donation-detail dd { margin: 0; }
+.recipient-profile-card { width: min(720px, 100%); }
+.recipient-form fieldset { min-width: 0; margin: 0; padding: 14px; border: 1px solid #d5e0d7; border-radius: 10px; }
+.recipient-form legend { padding: 0 6px; color: #30483b; font-size: .9rem; font-weight: 650; }
+.recipient-category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.recipient-category-grid label, .recipient-toggle { display: flex !important; align-items: center; gap: 9px !important; font-weight: 500 !important; }
+.recipient-category-grid input, .recipient-toggle input { width: auto !important; accent-color: var(--green); }
+.recipient-filter-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); align-items: end; gap: 12px; padding: 18px; margin-bottom: 22px; background: white; border: 1px solid #e1e9df; border-radius: 16px; }
+.recipient-filter-bar label { display: grid; gap: 7px; color: #30483b; font-size: .85rem; font-weight: 650; }
+.recipient-filter-bar input, .recipient-filter-bar select { min-width: 0; width: 100%; padding: 10px; border: 1px solid #d5e0d7; border-radius: 9px; background: white; }
+.recipient-profile-view { width: min(820px, 100%); padding: clamp(25px, 6vw, 48px); border: 1px solid #e1e9df; border-radius: 24px; background: white; box-shadow: 0 24px 70px #29483612; }
+.recipient-profile-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.recipient-profile-head h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); }
+.recipient-profile-view dl { display: grid; grid-template-columns: 160px 1fr; gap: 12px; margin-top: 28px; line-height: 1.5; }
+.recipient-profile-view dt { color: var(--muted); font-weight: 650; }
+.recipient-profile-view dd { margin: 0; }
 footer { text-align: center; padding: 24px; }
 @media (max-width: 560px) { .site-header { width: calc(100% - 32px); align-items: flex-start; } .header-nav { flex-wrap: wrap; justify-content: flex-end; gap: 10px; font-size: .82rem; } .role-badge { display: none; } }
 @media (max-width: 560px) { .donation-heading { align-items: flex-start; flex-direction: column; } .donation-fields-row { grid-template-columns: 1fr; } .donation-detail dl { grid-template-columns: 1fr; gap: 5px; } .donation-detail dd { margin-bottom: 10px; } }
+@media (max-width: 560px) { .recipient-profile-head { flex-direction: column; } .recipient-profile-view dl { grid-template-columns: 1fr; gap: 5px; } .recipient-profile-view dd { margin-bottom: 10px; } }
