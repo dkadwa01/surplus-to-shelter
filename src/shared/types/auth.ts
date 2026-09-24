@@ -4,6 +4,8 @@ export const UserRoleSchema = z.enum(["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]);
 export const SelfAssignableRoleSchema = z.enum(["DONOR", "RECIPIENT", "DRIVER"]);
 export type UserRole = z.infer<typeof UserRoleSchema>;
 export type SelfAssignableRole = z.infer<typeof SelfAssignableRoleSchema>;
+export const DonorTypeSchema = z.enum(["INDIVIDUAL", "CATERER", "FOOD_BUSINESS", "OTHER"]);
+export type DonorType = z.infer<typeof DonorTypeSchema>;
 
 export const PublicUserSchema = z.object({
   id: z.string(),
@@ -11,6 +13,7 @@ export const PublicUserSchema = z.object({
   email: z.string().email(),
   phone: z.string().nullable(),
   role: UserRoleSchema,
+  donorType: DonorTypeSchema.nullable(),
   createdAt: z.string().datetime(),
 });
 export type PublicUser = z.infer<typeof PublicUserSchema>;

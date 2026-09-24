@@ -1,5 +1,5 @@
 ﻿import { z } from "zod";
-import { SelfAssignableRoleSchema, UserRoleSchema } from "../types/auth.js";
+import { DonorTypeSchema, SelfAssignableRoleSchema } from "../types/auth.js";
 
 export const RegistrationRequestSchema = z.object({
   fullName: z.string().trim().min(2).max(100),
@@ -7,6 +7,7 @@ export const RegistrationRequestSchema = z.object({
   phone: z.string().trim().regex(/^\+[1-9]\d{7,14}$/, "Enter a phone number in international format, such as +14155552671.").optional(),
   password: z.string().min(12, "Password must be at least 12 characters.").max(128, "Password must be 128 characters or fewer."),
   role: SelfAssignableRoleSchema,
+  donorType: DonorTypeSchema.optional(),
 });
 export type RegistrationRequest = z.infer<typeof RegistrationRequestSchema>;
 
@@ -22,6 +23,8 @@ export const ApiErrorCodeSchema = z.enum([
   "INVALID_CREDENTIALS",
   "UNAUTHORIZED",
   "FORBIDDEN",
+  "NOT_FOUND",
+  "INVALID_STATE",
   "INTERNAL_ERROR",
 ]);
 export const ApiErrorResponseSchema = z.object({

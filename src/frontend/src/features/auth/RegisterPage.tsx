@@ -11,13 +11,14 @@ export function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<SelfAssignableRole>("DONOR");
+  const [donorType, setDonorType] = useState("INDIVIDUAL");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    const parsed = RegistrationRequestSchema.safeParse({ fullName, email, phone: phone || undefined, password, role });
+    const parsed = RegistrationRequestSchema.safeParse({ fullName, email, phone: phone || undefined, password, role, donorType: role === "DONOR" ? donorType : undefined });
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? "Check your details."); return; }
     setBusy(true);
     try { await register(parsed.data); navigate("/account", { replace: true }); }
@@ -35,6 +36,7 @@ export function RegisterPage() {
         <label>Email<input type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label>
         <label>Phone <span className="field-note">optional, international format</span><input type="tel" autoComplete="tel" placeholder="+14155552671" value={phone} onChange={(event) => setPhone(event.target.value)} /></label>
         <label>Account role<select value={role} onChange={(event) => setRole(event.target.value as SelfAssignableRole)}><option value="DONOR">Donor</option><option value="RECIPIENT">Recipient organization</option><option value="DRIVER">Driver / volunteer</option></select></label>
+        {role === "DONOR" && <label>Donor type<select value={donorType} onChange={(event) => setDonorType(event.target.value)}><option value="INDIVIDUAL">Individual</option><option value="CATERER">Wedding / event caterer</option><option value="FOOD_BUSINESS">Restaurant / food business</option><option value="OTHER">Other food donor</option></select></label>}
         <label>Password <span className="field-note">at least 12 characters</span><input type="password" autoComplete="new-password" minLength={12} required value={password} onChange={(event) => setPassword(event.target.value)} /></label>
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="primary-button" disabled={busy}>{busy ? "Creating account…" : "Create account"}</button>
