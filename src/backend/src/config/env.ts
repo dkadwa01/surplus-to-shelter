@@ -6,8 +6,10 @@ import { z } from "zod";
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), "../../../../.env") });
 
 const EnvironmentSchema = z.object({
+  DATABASE_URL: z.string().min(1),
   PORT: z.coerce.number().int().positive().default(4000),
   FRONTEND_ORIGIN: z.string().url().default("http://localhost:5173"),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 
 const parsed = EnvironmentSchema.safeParse(process.env);

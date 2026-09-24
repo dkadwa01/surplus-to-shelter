@@ -1,4 +1,6 @@
-﻿export * from "./types/health.js";
+﻿export * from "./types/auth.js";
+export * from "./validation/auth.js";
+export * from "./types/health.js";
 export * from "./types/realtime.js";
 export * from "./validation/health.js";
 export * from "./validation/realtime.js";
