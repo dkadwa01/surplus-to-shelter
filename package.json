@@ -1,0 +1,31 @@
+{
+    "name":  "surplus-to-shelter",
+    "private":  true,
+    "version":  "0.1.0",
+    "workspaces":  [
+                       "src/frontend",
+                       "src/backend",
+                       "src/shared"
+                   ],
+    "scripts":  {
+                    "dev":  "npm run build --workspace @surplus/shared \u0026\u0026 concurrently -k -n frontend,backend -c cyan,green \"npm --workspace @surplus/frontend run dev\" \"npm --workspace @surplus/backend run dev\"",
+                    "dev:frontend":  "npm run build --workspace @surplus/shared \u0026\u0026 npm --workspace @surplus/frontend run dev",
+                    "dev:backend":  "npm run build --workspace @surplus/shared \u0026\u0026 npm --workspace @surplus/backend run dev",
+                    "build":  "npm run build --workspace @surplus/shared \u0026\u0026 npm run build --workspace @surplus/backend \u0026\u0026 npm run build --workspace @surplus/frontend",
+                    "typecheck":  "npm run build --workspace @surplus/shared \u0026\u0026 npm run typecheck --workspace @surplus/shared \u0026\u0026 npm run typecheck --workspace @surplus/backend \u0026\u0026 npm run typecheck --workspace @surplus/frontend",
+                    "prisma:generate":  "prisma generate --schema database/schema.prisma",
+                    "prisma:validate":  "prisma validate --schema database/schema.prisma"
+                },
+    "devDependencies":  {
+                            "concurrently":  "^9.2.1",
+                            "prisma":  "^6.19.0",
+                            "typescript":  "^5.9.3"
+                        },
+    "allowScripts":  {
+                         "@prisma/client@6.19.3":  true,
+                         "@prisma/engines@6.19.3":  true,
+                         "prisma@6.19.3":  true,
+                         "esbuild@0.28.2":  true,
+                         "esbuild@0.21.5":  true
+                     }
+}
