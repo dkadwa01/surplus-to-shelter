@@ -1,4 +1,4 @@
-﻿import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 import { HomePage } from "../features/home/HomePage";
 import { NotFoundPage } from "../features/home/NotFoundPage";
 import { useAuth } from "../features/auth/AuthContext";
@@ -10,6 +10,8 @@ import { UnauthorizedPage } from "../features/auth/UnauthorizedPage";
 import { DonationsPage } from "../features/donations/DonationsPage";
 import { DonationFormPage } from "../features/donations/DonationFormPage";
 import { DonationDetailsPage } from "../features/donations/DonationDetailsPage";
+import { RecipientProfilePage } from "../features/recipients/RecipientProfilePage";
+import { RecipientsPage } from "../features/recipients/RecipientsPage";
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -18,6 +20,8 @@ export default function App() {
       <header className="site-header">
         <Link className="brand" to="/">Surplus <span>to Shelter</span></Link>
         {user?.role === "DONOR" && <Link to="/donations">My donations</Link>}
+        {user && ["DONOR", "DRIVER", "ADMIN"].includes(user.role) && <Link to="/recipients">Recipients</Link>}
+        {user?.role === "RECIPIENT" && <Link to="/recipients/profile">Recipient profile</Link>}
         <nav className="header-nav" aria-label="Account navigation">
           {loading ? <span className="foundation-label">Loading…</span> : user ? <><Link to="/account">{user.fullName}</Link><span className="role-badge">{user.role}</span><button className="text-button" onClick={() => { void logout(); }}>Sign out</button></> : <><Link to="/login">Sign in</Link><Link className="nav-join" to="/register">Create account</Link></>}
         </nav>
@@ -32,6 +36,8 @@ export default function App() {
           <Route path="/donations/new" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationFormPage /></ProtectedRoute>} />
           <Route path="/donations/:id/edit" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationFormPage /></ProtectedRoute>} />
           <Route path="/donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationDetailsPage /></ProtectedRoute>} />
+          <Route path="/recipients" element={<ProtectedRoute allowedRoles={["DONOR", "DRIVER", "ADMIN"]}><RecipientsPage /></ProtectedRoute>} />
+          <Route path="/recipients/profile" element={<ProtectedRoute allowedRoles={["RECIPIENT"]}><RecipientProfilePage /></ProtectedRoute>} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

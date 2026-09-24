@@ -20,6 +20,7 @@ model User {
   updatedAt    DateTime      @updatedAt
   sessions     AuthSession[]
   donations    Donation[]
+  recipientProfile RecipientProfile?
 }
 
 model AuthSession {
@@ -55,4 +56,41 @@ model Donation {
   @@index([donorId, status, createdAt])
   @@index([status, category, expiresAt])
   @@index([expiresAt])
+}
+
+model RecipientProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  organizationName       String
+  recipientType          String
+  description             String?
+  address                 String
+  serviceArea             String
+  latitude                Float?
+  longitude               Float?
+  serviceRadiusKm         Float?
+  capacityQuantity        Float?
+  capacityUnit            String?
+  dietaryRestrictions     String?
+  availabilityNotes       String?
+  isAcceptingDonations    Boolean  @default(true)
+  isActive                Boolean  @default(true)
+  verificationStatus      String   @default("PENDING")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  acceptedCategories      RecipientFoodCategory[]
+
+  @@index([verificationStatus, isActive, isAcceptingDonations])
+  @@index([recipientType, serviceArea])
+}
+
+model RecipientFoodCategory {
+  id          String           @id @default(cuid())
+  profileId   String
+  category    String
+  profile     RecipientProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, category])
+  @@index([category])
 }
