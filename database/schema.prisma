@@ -15,9 +15,11 @@ model User {
   phone        String?       @unique
   passwordHash String
   role         String        @default("DONOR")
+  donorType    String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   sessions     AuthSession[]
+  donations    Donation[]
 }
 
 model AuthSession {
@@ -28,5 +30,29 @@ model AuthSession {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+model Donation {
+  id             String   @id @default(cuid())
+  donorId        String
+  foodName       String
+  category       String
+  quantity       Float
+  unit           String
+  preparedAt     DateTime?
+  expiresAt      DateTime
+  pickupAddress  String
+  pickupArea     String
+  latitude       Float?
+  longitude      Float?
+  description    String?
+  status         String   @default("AVAILABLE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  donor          User     @relation(fields: [donorId], references: [id], onDelete: Restrict)
+
+  @@index([donorId, status, createdAt])
+  @@index([status, category, expiresAt])
   @@index([expiresAt])
 }

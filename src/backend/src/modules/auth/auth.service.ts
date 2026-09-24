@@ -5,7 +5,7 @@ import { ApiError } from "../../shared/api-error.js";
 import { createSessionToken, hashPassword, hashSessionToken, verifyPassword } from "./crypto.js";
 import { SESSION_DURATION_SECONDS } from "./session-cookie.js";
 
-const toPublicUser = (user: { id: string; fullName: string; email: string; phone: string | null; role: string; createdAt: Date }): PublicUser =>
+const toPublicUser = (user: { id: string; fullName: string; email: string; phone: string | null; role: string; donorType: string | null; createdAt: Date }): PublicUser =>
   PublicUserSchema.parse({ ...user, createdAt: user.createdAt.toISOString() });
 
 function isUniqueConstraintError(error: unknown): boolean {
@@ -21,7 +21,7 @@ export async function registerUser(input: RegistrationRequest): Promise<{ user: 
   try {
     const user = await prisma.$transaction(async (transaction) => {
       const created = await transaction.user.create({
-        data: { fullName: input.fullName, email: input.email, phone: input.phone ?? null, passwordHash, role: input.role },
+        data: { fullName: input.fullName, email: input.email, phone: input.phone ?? null, passwordHash, role: input.role, donorType: input.role === "DONOR" ? input.donorType ?? "INDIVIDUAL" : null },
       });
       await transaction.authSession.create({ data: { tokenHash, userId: created.id, expiresAt } });
       return created;

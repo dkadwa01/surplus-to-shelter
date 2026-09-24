@@ -4,6 +4,7 @@ import { env } from "./config/env.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { realtimeRouter } from "./modules/realtime/realtime.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { donationRouter } from "./modules/donations/donation.routes.js";
 import { errorHandler } from "./shared/error-handler.js";
 
 export const app = express();
@@ -13,4 +14,5 @@ app.use(express.json({ limit: "32kb" }));
 app.use("/api/health", healthRouter);
 app.use("/api/events", realtimeRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/donations", donationRouter);
 app.use(errorHandler);
