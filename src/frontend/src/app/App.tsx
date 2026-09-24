@@ -12,6 +12,9 @@ import { DonationFormPage } from "../features/donations/DonationFormPage";
 import { DonationDetailsPage } from "../features/donations/DonationDetailsPage";
 import { RecipientProfilePage } from "../features/recipients/RecipientProfilePage";
 import { RecipientsPage } from "../features/recipients/RecipientsPage";
+import { VerificationPage } from "../features/verification/VerificationPage";
+import { AdminVerificationListPage } from "../features/verification/AdminVerificationListPage";
+import { AdminVerificationDetailPage } from "../features/verification/AdminVerificationDetailPage";
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -22,6 +25,8 @@ export default function App() {
         {user?.role === "DONOR" && <Link to="/donations">My donations</Link>}
         {user && ["DONOR", "DRIVER", "ADMIN"].includes(user.role) && <Link to="/recipients">Recipients</Link>}
         {user?.role === "RECIPIENT" && <Link to="/recipients/profile">Recipient profile</Link>}
+        {user && ["DONOR", "RECIPIENT", "DRIVER"].includes(user.role) && <Link to="/verification">Verification</Link>}
+        {user?.role === "ADMIN" && <Link to="/admin/verifications">Verification review</Link>}
         <nav className="header-nav" aria-label="Account navigation">
           {loading ? <span className="foundation-label">Loading…</span> : user ? <><Link to="/account">{user.fullName}</Link><span className="role-badge">{user.role}</span><button className="text-button" onClick={() => { void logout(); }}>Sign out</button></> : <><Link to="/login">Sign in</Link><Link className="nav-join" to="/register">Create account</Link></>}
         </nav>
@@ -38,6 +43,9 @@ export default function App() {
           <Route path="/donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationDetailsPage /></ProtectedRoute>} />
           <Route path="/recipients" element={<ProtectedRoute allowedRoles={["DONOR", "DRIVER", "ADMIN"]}><RecipientsPage /></ProtectedRoute>} />
           <Route path="/recipients/profile" element={<ProtectedRoute allowedRoles={["RECIPIENT"]}><RecipientProfilePage /></ProtectedRoute>} />
+          <Route path="/verification" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER"]}><VerificationPage role={user?.role ?? "DONOR"} donorType={user?.donorType ?? null} /></ProtectedRoute>} />
+          <Route path="/admin/verifications" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminVerificationListPage /></ProtectedRoute>} />
+          <Route path="/admin/verifications/:id" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AdminVerificationDetailPage /></ProtectedRoute>} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

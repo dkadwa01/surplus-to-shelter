@@ -121,7 +121,7 @@ test("recipient profiles enforce role, ownership, validation and pending verific
     assert.notEqual(noProfileIdRoute.status, 200);
   });
   await t.test("discovery exposes only verified active profiles and applies filters", async () => {
-    const pendingList = await fetch(`${baseUrl}/api/recipients?recipientType=SHELTER`, { headers: { cookie: donorCookie } });
+    const pendingList = await fetch(`${baseUrl}/api/recipients?recipientType=SHELTER&serviceArea=North`, { headers: { cookie: donorCookie } });
     assert.equal(pendingList.status, 200); assert.deepEqual(await pendingList.json(), []);
     await prisma.recipientProfile.update({ where: { id: profileId }, data: { verificationStatus: "VERIFIED" } });
     const result = await fetch(`${baseUrl}/api/recipients?recipientType=SHELTER&serviceArea=North&category=BAKERY`, { headers: { cookie: donorCookie } });
@@ -134,7 +134,7 @@ test("recipient profiles enforce role, ownership, validation and pending verific
     const driverDiscovery = await fetch(`${baseUrl}/api/recipients`, { headers: { cookie: driverCookie } });
     assert.equal(driverDiscovery.status, 200);
 
-    const unavailable = await fetch(`${baseUrl}/api/recipients?accepting=false`, { headers: { cookie: donorCookie } });
+    const unavailable = await fetch(`${baseUrl}/api/recipients?serviceArea=North&accepting=false`, { headers: { cookie: donorCookie } });
     assert.deepEqual(await unavailable.json(), []);
     const hiddenInactive = await fetch(`${baseUrl}/api/recipients?active=false`, { headers: { cookie: donorCookie } });
     assert.equal(hiddenInactive.status, 403);

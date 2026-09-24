@@ -27,6 +27,20 @@ Recipient profile endpoints require the existing session cookie and `RECIPIENT` 
 
 Profile fields include organization name/type, description, address/service area, optional paired coordinates and radius, accepted food categories, optional current capacity/unit, dietary requirements, availability notes, and active/accepting flags. New profiles are never automatically verified. Verification status values are `PENDING`, `VERIFIED`, `REJECTED`, and `RESTRICTED`; no verification workflow is included in this module.
 
+## Verification
+
+Verification uses the same session cookie. Participants may only submit for their own session account; participant type is derived from the account role. No identity documents or private document URLs are accepted or stored.
+
+| Method | Path | Access | Result |
+| --- | --- | --- | --- |
+| `POST` | `/api/verification/requests` | Donor, recipient, driver | Submits a verification request; creates a pending request and history record (`201`). An active pending/under-review request prevents duplicates. |
+| `GET` | `/api/verification/me` | Authenticated participant | Returns the signed-in user's latest request/status and status history, or `NOT_SUBMITTED`. |
+| `GET` | `/api/verification/admin/requests?status=VERIFIED` | Admin | Lists up to 100 requests; defaults to pending and under review. Optional status filter. |
+| `GET` | `/api/verification/admin/requests/:id` | Admin | Returns applicant information and request history for review. |
+| `PATCH` | `/api/verification/admin/requests/:id` | Admin | Body action is `UNDER_REVIEW`, `VERIFIED`, `REJECTED`, or `SUSPENDED`; rejection/suspension require a reason of at least 10 characters. |
+
+Donor businesses submit an organization name; recipient requests reuse the linked recipient profile; drivers submit a vehicle type. An optional short note is supported. Valid transitions are `PENDING -> UNDER_REVIEW|VERIFIED|REJECTED`, `UNDER_REVIEW -> VERIFIED|REJECTED`, and `VERIFIED -> SUSPENDED`. Rejected participants may submit a new request. Verified and suspended accounts cannot resubmit. Recipient profile verification state is synchronized by admin decisions. `requireVerifiedUser` is available for future sensitive routes; existing donation and recipient routes are not newly gated.
+
 Fields: `foodName`, `category` (`PREPARED_MEALS`, `PRODUCE`, `BAKERY`, `DAIRY`, `GRAINS`, `PROTEIN`, `OTHER`), positive finite `quantity`, `unit` (`SERVINGS`, `KG`, `GRAMS`, `LITRES`, `ITEMS`, `PACKAGES`), future ISO `expiresAt`, `pickupAddress`, `pickupArea`; optional `preparedAt`, paired `latitude`/`longitude`, and `description`. The response includes `donorId`, the account's `donorType`, `status`, and timestamps. Donor type values: `INDIVIDUAL`, `CATERER`, `FOOD_BUSINESS`, `OTHER`.
 
 Errors include `INVALID_INPUT` (`400`), `UNAUTHORIZED` (`401`), `FORBIDDEN` (`403`), `NOT_FOUND` (`404`), and `INVALID_STATE` (`409`). Expired available records are marked `EXPIRED` when accessed. Allowed lifecycle in this module: `AVAILABLE -> CANCELLED` or `AVAILABLE -> EXPIRED`; future reservation/delivery states belong to later modules.

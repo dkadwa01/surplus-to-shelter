@@ -21,6 +21,8 @@ model User {
   sessions     AuthSession[]
   donations    Donation[]
   recipientProfile RecipientProfile?
+  verificationRequests VerificationRequest[]
+  verificationReviews VerificationRecord[] @relation("VerificationReviewer")
 }
 
 model AuthSession {
@@ -93,4 +95,39 @@ model RecipientFoodCategory {
 
   @@unique([profileId, category])
   @@index([category])
+}
+
+model VerificationRequest {
+  id                String   @id @default(cuid())
+  userId            String
+  participantType   String
+  status            String   @default("PENDING")
+  activeUserId      String?  @unique
+  organizationName  String?
+  vehicleType       String?
+  additionalInfo    String?
+  reviewReason      String?
+  reviewedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records           VerificationRecord[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model VerificationRecord {
+  id              String              @id @default(cuid())
+  requestId       String
+  previousStatus  String?
+  newStatus       String
+  reviewerId      String?
+  reason          String?
+  createdAt       DateTime            @default(now())
+  request         VerificationRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  reviewer        User?               @relation("VerificationReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+
+  @@index([requestId, createdAt])
+  @@index([reviewerId])
 }
