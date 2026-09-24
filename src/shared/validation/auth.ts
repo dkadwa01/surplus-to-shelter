@@ -25,6 +25,7 @@ export const ApiErrorCodeSchema = z.enum([
   "FORBIDDEN",
   "NOT_FOUND",
   "INVALID_STATE",
+  "VERIFICATION_REQUIRED",
   "INTERNAL_ERROR",
 ]);
 export const ApiErrorResponseSchema = z.object({

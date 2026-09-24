@@ -3,7 +3,7 @@
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
-    public readonly code: "DUPLICATE_ACCOUNT" | "INVALID_CREDENTIALS" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "INVALID_STATE" | "INTERNAL_ERROR",
+    public readonly code: "INVALID_INPUT" | "DUPLICATE_ACCOUNT" | "INVALID_CREDENTIALS" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "INVALID_STATE" | "VERIFICATION_REQUIRED" | "INTERNAL_ERROR",
     message: string,
   ) {
     super(message);

@@ -19,3 +19,11 @@ SQLite is managed through Prisma in `database/schema.prisma`; migrations live un
 - Discovery only returns `VERIFIED`, active profiles and omits exact street address and account contact details. A future matching record can reference a donation and recipient together without changing the donation lifecycle or adding reservation behavior here.
 
 Current donation statuses: `AVAILABLE`, `CANCELLED`, `EXPIRED`. Reservation, pickup, delivery, and completion statuses are intentionally deferred until those workflows are implemented.
+
+## Verification records
+
+- `VerificationRequest` belongs to a `User`; multiple requests preserve resubmission history. Participant type is captured from the account role at submission.
+- A nullable unique `activeUserId` is set while a request is pending/under review and cleared on a terminal decision, preventing concurrent active requests per user while allowing resubmission after rejection.
+- `VerificationRecord` is append-only status history with previous/new status, reviewer, optional reason, and timestamp. Requests cascade with the applicant; reviewer deletion preserves history and sets reviewer ID to null.
+- Only minimal submitted information is stored: business name, driver vehicle type, and an optional note. Recipient organization/contact data reuses `RecipientProfile` and `User`. No document contents or public document URLs are stored.
+- Recipient profile verification status follows admin outcomes (`VERIFIED`, `REJECTED`, `RESTRICTED`) and returns to `PENDING` on a valid resubmission. Other roles use their latest verification request as their trust state.
