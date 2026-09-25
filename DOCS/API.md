@@ -43,4 +43,27 @@ Donor businesses submit an organization name; recipient requests reuse the linke
 
 Fields: `foodName`, `category` (`PREPARED_MEALS`, `PRODUCE`, `BAKERY`, `DAIRY`, `GRAINS`, `PROTEIN`, `OTHER`), positive finite `quantity`, `unit` (`SERVINGS`, `KG`, `GRAMS`, `LITRES`, `ITEMS`, `PACKAGES`), future ISO `expiresAt`, `pickupAddress`, `pickupArea`; optional `preparedAt`, paired `latitude`/`longitude`, and `description`. The response includes `donorId`, the account's `donorType`, `status`, and timestamps. Donor type values: `INDIVIDUAL`, `CATERER`, `FOOD_BUSINESS`, `OTHER`.
 
+## Community donations
+
+All community donation routes require an authenticated session. Browsing is available to signed-in roles. Creating a collection, contributing, editing/withdrawing a contribution, and organizer actions require a verified `DONOR`. The user ID always comes from the session. Organizer actions are restricted to the collection creator. Contribution summaries omit donor names and contact details; notes are returned only to the author.
+
+| Method | Path | Access | Result |
+| --- | --- | --- | --- |
+| `GET` | `/api/community-donations?pickupArea=North` | Authenticated | Lists up to 100 open/target-reached collections, with optional area substring filter. |
+| `GET` | `/api/community-donations?status=CLOSED` | Donor, admin | Filters by any lifecycle status. |
+| `GET` | `/api/community-donations/:id` | Authenticated | Collection, unit-separated totals, progress, contributor count and up to 200 recent active contribution summaries. |
+| `POST` | `/api/community-donations` | Verified donor | Creates a collection; target quantity/category/unit are optional and must be provided together (`201`). |
+| `POST` | `/api/community-donations/:id/contributions` | Verified donor | Adds an individually attributed food item (`201`). |
+| `GET` | `/api/community-donations/contributions/:contributionId` | Authenticated owner | Reads the current user's own contribution; other IDs return `404`. |
+| `PUT` | `/api/community-donations/contributions/:contributionId` | Verified donor owner | Edits an active contribution while its collection is `OPEN`. |
+| `POST` | `/api/community-donations/contributions/:contributionId/withdraw` | Verified donor owner | Withdraws an active contribution while its collection is `OPEN`. |
+| `POST` | `/api/community-donations/:id/close` | Verified creator | Closes an `OPEN` or `TARGET_REACHED` collection. |
+| `POST` | `/api/community-donations/:id/cancel` | Verified creator | Cancels an `OPEN` collection. |
+| `GET` | `/api/community-donations/thresholds` | Authenticated | Lists configured individual posting thresholds. |
+| `PUT` | `/api/community-donations/admin/thresholds` | Admin | Upserts a threshold by category/unit; body includes `category`, `unit`, and `minimumQuantity`. |
+
+Group lifecycle: `OPEN -> TARGET_REACHED -> CLOSED`, or `OPEN -> CLOSED|CANCELLED|EXPIRED`; an open group may also expire. Reached/closed/cancelled/expired collections reject contribution changes. Target progress is calculated only for the selected category and unit; all other totals remain separate. A community contribution below a configured individual-post threshold is accepted as a collective exception and flagged only in its owner's response. No threshold is preconfigured, so no arbitrary quantity is assumed. Expiration is processed when collections are read or changed.
+
+Configured thresholds are also enforced when standalone donations are created or edited. Administrators configure them through the threshold endpoint; until a category/unit threshold is configured, the system applies no minimum for that pair.
+
 Errors include `INVALID_INPUT` (`400`), `UNAUTHORIZED` (`401`), `FORBIDDEN` (`403`), `NOT_FOUND` (`404`), and `INVALID_STATE` (`409`). Expired available records are marked `EXPIRED` when accessed. Allowed lifecycle in this module: `AVAILABLE -> CANCELLED` or `AVAILABLE -> EXPIRED`; future reservation/delivery states belong to later modules.

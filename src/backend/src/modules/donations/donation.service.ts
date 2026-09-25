@@ -14,7 +14,14 @@ function dataFromFields(fields: DonationFields) {
     pickupAddress: fields.pickupAddress, pickupArea: fields.pickupArea, latitude: fields.latitude ?? null,
     longitude: fields.longitude ?? null, description: fields.description ?? null };
 }
+async function assertIndividualThreshold(fields: DonationFields) {
+  const threshold = await prisma.individualContributionThreshold.findUnique({ where: { category_unit: { category: fields.category, unit: fields.unit } } });
+  if (threshold && fields.quantity < threshold.minimumQuantity) {
+    throw new ApiError(400, "INVALID_INPUT", `Individual donations for this category and unit must be at least ${threshold.minimumQuantity} ${fields.unit.toLowerCase()}. Try contributing to a community collection for smaller portions.`);
+  }
+}
 export async function createDonation(donorId: string, fields: DonationFields) {
+  await assertIndividualThreshold(fields);
   return toResponse(await prisma.donation.create({ data: { ...dataFromFields(fields), donorId }, include: includeDonor }));
 }
 export async function listDonations(userId: string, isAdmin: boolean, filters: { status?: string; category?: string }) {
@@ -34,6 +41,7 @@ export async function getDonation(id: string, userId: string, isAdmin: boolean) 
 export async function updateDonation(id: string, userId: string, isAdmin: boolean, fields: DonationFields) {
   const current = await ownedDonation(id, userId, isAdmin);
   if (current.status !== "AVAILABLE" || current.expiresAt.getTime() <= Date.now()) throw new ApiError(409, "INVALID_STATE", "Only unexpired available donations can be edited.");
+  await assertIndividualThreshold(fields);
   return toResponse(await prisma.donation.update({ where: { id }, data: dataFromFields(fields), include: includeDonor }));
 }
 export async function cancelDonation(id: string, userId: string, isAdmin: boolean) {

@@ -7,3 +7,4 @@ export * from "./validation/realtime.js";
 export * from "./types/donation.js";
 export * from "./types/recipient.js";
 export * from "./types/verification.js";
+export * from "./types/community-donation.js";

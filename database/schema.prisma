@@ -23,6 +23,8 @@ model User {
   recipientProfile RecipientProfile?
   verificationRequests VerificationRequest[]
   verificationReviews VerificationRecord[] @relation("VerificationReviewer")
+  organizedCommunityDonations CommunityDonation[] @relation("CommunityOrganizer")
+  communityContributions CommunityContribution[] @relation("CommunityContributor")
 }
 
 model AuthSession {
@@ -130,4 +132,61 @@ model VerificationRecord {
 
   @@index([requestId, createdAt])
   @@index([reviewerId])
+}
+
+model CommunityDonation {
+  id             String   @id @default(cuid())
+  creatorId      String
+  title          String
+  description    String?
+  pickupArea     String
+  latitude       Float?
+  longitude      Float?
+  targetQuantity Float?
+  targetCategory String?
+  targetUnit     String?
+  deadline       DateTime
+  status         String   @default("OPEN")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  creator        User     @relation("CommunityOrganizer", fields: [creatorId], references: [id], onDelete: Restrict)
+  contributions  CommunityContribution[]
+
+  @@index([status, pickupArea, deadline])
+  @@index([creatorId, status, createdAt])
+  @@index([deadline, status])
+}
+
+model CommunityContribution {
+  id                       String   @id @default(cuid())
+  communityDonationId      String
+  contributorId            String
+  foodName                 String
+  category                 String
+  quantity                 Float
+  unit                     String
+  expiresAt                DateTime
+  note                     String?
+  status                   String   @default("ACTIVE")
+  belowIndividualThreshold Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  communityDonation        CommunityDonation @relation(fields: [communityDonationId], references: [id], onDelete: Restrict)
+  contributor              User     @relation("CommunityContributor", fields: [contributorId], references: [id], onDelete: Restrict)
+
+  @@index([communityDonationId, status, createdAt])
+  @@index([contributorId, status, createdAt])
+  @@index([category, unit, status])
+}
+
+// Admin-managed individual-post thresholds. Collective contributions remain
+// allowed below these values and are explicitly marked as community exceptions.
+model IndividualContributionThreshold {
+  id              String   @id @default(cuid())
+  category        String
+  unit            String
+  minimumQuantity Float
+  updatedAt       DateTime @updatedAt
+
+  @@unique([category, unit])
 }

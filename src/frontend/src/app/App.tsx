@@ -15,6 +15,8 @@ import { RecipientsPage } from "../features/recipients/RecipientsPage";
 import { VerificationPage } from "../features/verification/VerificationPage";
 import { AdminVerificationListPage } from "../features/verification/AdminVerificationListPage";
 import { AdminVerificationDetailPage } from "../features/verification/AdminVerificationDetailPage";
+import { CommunityDonationsPage } from "../features/community-donations/CommunityDonationsPage";
+import { CommunityDonationDetailsPage } from "../features/community-donations/CommunityDonationDetailsPage";
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -23,6 +25,7 @@ export default function App() {
       <header className="site-header">
         <Link className="brand" to="/">Surplus <span>to Shelter</span></Link>
         {user?.role === "DONOR" && <Link to="/donations">My donations</Link>}
+        {user && <Link to="/community-donations">Community donations</Link>}
         {user && ["DONOR", "DRIVER", "ADMIN"].includes(user.role) && <Link to="/recipients">Recipients</Link>}
         {user?.role === "RECIPIENT" && <Link to="/recipients/profile">Recipient profile</Link>}
         {user && ["DONOR", "RECIPIENT", "DRIVER"].includes(user.role) && <Link to="/verification">Verification</Link>}
@@ -41,6 +44,8 @@ export default function App() {
           <Route path="/donations/new" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationFormPage /></ProtectedRoute>} />
           <Route path="/donations/:id/edit" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationFormPage /></ProtectedRoute>} />
           <Route path="/donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationDetailsPage /></ProtectedRoute>} />
+          <Route path="/community-donations" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]}><CommunityDonationsPage /></ProtectedRoute>} />
+          <Route path="/community-donations/:id" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]}><CommunityDonationDetailsPage /></ProtectedRoute>} />
           <Route path="/recipients" element={<ProtectedRoute allowedRoles={["DONOR", "DRIVER", "ADMIN"]}><RecipientsPage /></ProtectedRoute>} />
           <Route path="/recipients/profile" element={<ProtectedRoute allowedRoles={["RECIPIENT"]}><RecipientProfilePage /></ProtectedRoute>} />
           <Route path="/verification" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER"]}><VerificationPage role={user?.role ?? "DONOR"} donorType={user?.donorType ?? null} /></ProtectedRoute>} />
