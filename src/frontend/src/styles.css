@@ -120,8 +120,33 @@ h1 { margin: 18px 0; font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.02; let
 .community-organizer-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 20px; margin-top: 28px; border-top: 1px solid #e5ebe5; }
 .community-organizer-actions h2 { flex-basis: 100%; margin: 0; }
 .status-target_reached { background: #edf1d9; color: #5c6723; }
+.matching-page { display: grid; gap: 16px; }
+.matching-page h1 { margin: 0; font-size: clamp(2.1rem, 6vw, 3.4rem); }
+.matching-list { display: grid; gap: 15px; }
+.match-card { padding: 22px; border: 1px solid #e1e9df; border-radius: 17px; background: #fff; box-shadow: 0 14px 44px #2948360b; }
+.match-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.match-card-head h2 { margin: 6px 0 0; font-size: 1.35rem; }
+.match-card-head .eyebrow { margin: 0; }
+.match-score { padding: 8px 12px; border-radius: 999px; background: #e6f1e8; color: #315e43; font-weight: 800; white-space: nowrap; }
+.match-score small { font-size: .72rem; font-weight: 600; }
+.match-pair-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.match-pair-grid section { padding: 15px; border-radius: 12px; background: #f5f8f3; }
+.match-pair-grid h3, .match-card > h3 { margin: 0 0 8px; font-size: .98rem; }
+.match-pair-grid p { margin: 7px 0; color: #53645b; font-size: .9rem; }
+.match-metrics { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.match-metrics span { padding: 6px 9px; border-radius: 8px; background: #eef3ed; color: #41564a; font-size: .8rem; font-weight: 650; }
+.match-card > h3 { margin-top: 17px; }
+.match-reasons, .match-warnings { display: grid; gap: 5px; padding-left: 20px; color: #42584a; font-size: .88rem; line-height: 1.5; }
+.match-warnings { color: #805c22; }
+.match-card-foot { display: flex; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid #e8eee7; color: var(--muted); font-size: .78rem; }
+.matching-source { display: grid; gap: 12px; padding: 18px; border: 1px solid #dce8de; border-radius: 15px; background: #f8faf7; }
+.matching-source h2, .matching-source p { margin: 0; }
+.match-eligibility { padding: 12px 15px; border-radius: 10px; font-weight: 750; }
+.match-eligibility.eligible { color: #315e43; background: #e6f1e8; }
+.match-eligibility.ineligible { color: #854b42; background: #f3e9e7; }
 footer { text-align: center; padding: 24px; }
 @media (max-width: 560px) { .site-header { width: calc(100% - 32px); align-items: flex-start; } .header-nav { flex-wrap: wrap; justify-content: flex-end; gap: 10px; font-size: .82rem; } .role-badge { display: none; } }
 @media (max-width: 560px) { .donation-heading { align-items: flex-start; flex-direction: column; } .donation-fields-row { grid-template-columns: 1fr; } .donation-detail dl { grid-template-columns: 1fr; gap: 5px; } .donation-detail dd { margin-bottom: 10px; } }
 @media (max-width: 560px) { .recipient-profile-head { flex-direction: column; } .recipient-profile-view dl { grid-template-columns: 1fr; gap: 5px; } .recipient-profile-view dd { margin-bottom: 10px; } }
 @media (max-width: 560px) { .community-filters, .community-contribution { align-items: stretch; flex-direction: column; } }
+@media (max-width: 560px) { .match-pair-grid { grid-template-columns: 1fr; } .match-card-foot { align-items: flex-start; flex-direction: column; } }

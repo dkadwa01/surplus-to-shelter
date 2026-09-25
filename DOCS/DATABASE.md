@@ -35,3 +35,7 @@ Current donation statuses: `AVAILABLE`, `CANCELLED`, `EXPIRED`. Reservation, pic
 - `VerificationRecord` is append-only status history with previous/new status, reviewer, optional reason, and timestamp. Requests cascade with the applicant; reviewer deletion preserves history and sets reviewer ID to null.
 - Only minimal submitted information is stored: business name, driver vehicle type, and an optional note. Recipient organization/contact data reuses `RecipientProfile` and `User`. No document contents or public document URLs are stored.
 - Recipient profile verification status follows admin outcomes (`VERIFIED`, `REJECTED`, `RESTRICTED`) and returns to `PENDING` on a valid resubmission. Other roles use their latest verification request as their trust state.
+
+## Matching
+
+Matching uses the existing `Donation`, `RecipientProfile`, `RecipientFoodCategory`, `CommunityDonation`, `CommunityContribution`, and `VerificationRequest` records. It does not create match/assignment rows or decrement quantities. Individual sources must be `AVAILABLE` and unexpired. Community items are considered separately only when the group is `TARGET_REACHED` or `CLOSED`, the contribution remains `ACTIVE` and unexpired, and the contributor's latest verification is `VERIFIED`. Results are suggestions only until a later allocation workflow exists.

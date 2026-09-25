@@ -67,3 +67,16 @@ Group lifecycle: `OPEN -> TARGET_REACHED -> CLOSED`, or `OPEN -> CLOSED|CANCELLE
 Configured thresholds are also enforced when standalone donations are created or edited. Administrators configure them through the threshold endpoint; until a category/unit threshold is configured, the system applies no minimum for that pair.
 
 Errors include `INVALID_INPUT` (`400`), `UNAUTHORIZED` (`401`), `FORBIDDEN` (`403`), `NOT_FOUND` (`404`), and `INVALID_STATE` (`409`). Expired available records are marked `EXPIRED` when accessed. Allowed lifecycle in this module: `AVAILABLE -> CANCELLED` or `AVAILABLE -> EXPIRED`; future reservation/delivery states belong to later modules.
+
+## Matching
+
+Matching routes require the existing session cookie and calculate suggestions on demand. No match, allocation, or reservation is persisted. Donor-side requests are scoped to the donor's own source; recipient-side requests always use the signed-in recipient's own profile. Match details can be read by the source owner or by the owner of the recipient profile. Other owners receive `404`.
+
+| Method | Path | Access | Result |
+| --- | --- | --- | --- |
+| `GET` | `/api/matching/donations/:donationId/recipients` | Donor, source owner | Suitable verified recipients for an unexpired `AVAILABLE` donation. |
+| `GET` | `/api/matching/community-donations/:communityDonationId/recipients` | Donor, collection organizer | Per-item recipient matches for a target-reached or closed collection. Only active, unexpired contributions from currently verified contributors are considered. |
+| `GET` | `/api/matching/recipients/me/donations` | Verified, active, accepting recipient | Suitable individual donations and eligible community contributions for the signed-in profile. |
+| `GET` | `/api/matching/details/:sourceType/:sourceId/recipients/:recipientProfileId` | Donor source owner or recipient profile owner | One pair's eligibility, factor scores, reasons, and warnings. A known but incompatible pair can return `eligible: false`. Unverified/inactive recipient profiles are hidden as `404`. |
+
+Candidate lists contain only eligible pairs and are capped at 100 direct donations, 1,000 community contribution items, or 100 recipient profiles per request. Responses omit donor identity, street addresses, recipient contact details, and exact coordinates. Distance is rounded to the nearest kilometer and is straight-line distance, not a route estimate. An unavailable/expired individual donation returns `409`; a community collection must be `TARGET_REACHED` or `CLOSED`.

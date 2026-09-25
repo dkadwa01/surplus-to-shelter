@@ -8,3 +8,4 @@ export * from "./types/donation.js";
 export * from "./types/recipient.js";
 export * from "./types/verification.js";
 export * from "./types/community-donation.js";
+export * from "./types/matching.js";
