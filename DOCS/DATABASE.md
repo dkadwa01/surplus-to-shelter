@@ -20,6 +20,14 @@ SQLite is managed through Prisma in `database/schema.prisma`; migrations live un
 
 Current donation statuses: `AVAILABLE`, `CANCELLED`, `EXPIRED`. Reservation, pickup, delivery, and completion statuses are intentionally deferred until those workflows are implemented.
 
+## Community collections
+
+- `CommunityDonation` records the organizer, public title/description, area and optional coordinates, optional single category/unit target, deadline and lifecycle state.
+- `CommunityContribution` records each household's food item separately with contributor, category, quantity/unit, use-by time, optional private note and withdrawal state. It does not copy or alter a standalone `Donation`, avoiding duplicate availability records until a future reservation/transfer lifecycle exists.
+- `IndividualContributionThreshold` stores administrator-configured minimums by category and unit. No default amount is inserted. A community contribution below an individual-post minimum remains valid and is flagged as an exception.
+- Totals aggregate only active contributions grouped by category and unit. Optional target progress uses only the target category/unit, so kilograms, servings and liters are never combined.
+- Contributions and groups are retained; foreign keys restrict deletion to preserve history. Organizer and contributor identities are not exposed in discovery responses. Notes are returned only to their author.
+
 ## Verification records
 
 - `VerificationRequest` belongs to a `User`; multiple requests preserve resubmission history. Participant type is captured from the account role at submission.
