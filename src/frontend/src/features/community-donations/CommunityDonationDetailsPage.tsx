@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FoodCategorySchema, QuantityUnitSchema, type CommunityContributionFields, type CommunityDonationResponse } from "@surplus/shared";
+import { FoodCategorySchema, QuantityUnitSchema, type CommunityContributionFields, type CommunityDonationResponse, type DashboardSummary } from "@surplus/shared";
 import { useAuth } from "../auth/AuthContext";
 import { addCommunityContribution, getCommunityDonation, manageCommunityDonation, updateCommunityContribution, withdrawCommunityContribution } from "./community-donation-api";
+import { LocationMap } from "../../components/LocationMap";
 
 const categories = FoodCategorySchema.options;
 const units = QuantityUnitSchema.options;
@@ -54,6 +55,15 @@ export function CommunityDonationDetailsPage() {
   const canContribute = user?.role === "DONOR" && group.status === "OPEN" && Date.parse(group.deadline) > Date.now();
   const canManage = group.isOrganizer && ["OPEN", "TARGET_REACHED"].includes(group.status);
   const activeMine = group.contributions.find((contribution) => contribution.id === editing);
+  const targetCategoryTotals = group.targetCategory ? group.totals.filter((total) => total.category === group.targetCategory) : [];
+  const matchingTargetTotal = group.targetUnit === "KG"
+    ? targetCategoryTotals.reduce((sum, total) => sum + (total.unit === "KG" ? total.quantity : total.unit === "GRAMS" ? total.quantity / 1000 : 0), 0)
+    : group.targetUnit === "GRAMS"
+      ? targetCategoryTotals.reduce((sum, total) => sum + (total.unit === "GRAMS" ? total.quantity : total.unit === "KG" ? total.quantity * 1000 : 0), 0)
+      : group.targetUnit ? targetCategoryTotals.find((total) => total.unit === group.targetUnit)?.quantity ?? 0 : null;
+  const displayedTargetTotal = matchingTargetTotal === null ? null : Number(matchingTargetTotal.toFixed(3));
+  const targetRemaining = displayedTargetTotal !== null && group.targetQuantity !== null ? Math.max(0, Number((group.targetQuantity - displayedTargetTotal).toFixed(3))) : null;
+  const mapPoints: DashboardSummary["mapPoints"] = group.latitude !== null && group.longitude !== null ? [{ id: group.id, type: "COMMUNITY", label: group.title, area: group.pickupArea, latitude: group.latitude, longitude: group.longitude }] : [];
 
   return <section className="donation-detail community-detail">
     <Link to="/community-donations">← All collections</Link>
@@ -61,10 +71,12 @@ export function CommunityDonationDetailsPage() {
     <h1>{group.title}</h1><p className="auth-description">{group.description || "A neighborhood food collection."}</p>
     <p>Collection deadline: {new Date(group.deadline).toLocaleString()}</p>
     {group.isOrganizer && ["TARGET_REACHED", "CLOSED"].includes(group.status) && <p><Link className="secondary-button" to={`/matching/community-donations/${group.id}`}>Find recipient matches</Link></p>}
-    {group.targetQuantity && <div className="community-progress"><div><strong>{group.targetProgressPercent}%</strong><span> of {group.targetQuantity} {group.targetUnit?.toLowerCase()} {group.targetCategory?.replace(/_/g, " ").toLowerCase()}</span></div><progress max="100" value={group.targetProgressPercent ?? 0} /></div>}
+    {group.targetQuantity && <div className="community-progress"><p><strong>Target:</strong> {group.targetQuantity} {group.targetUnit?.toLowerCase()} {group.targetCategory?.replace(/_/g, " ").toLowerCase()}</p><p><strong>Collected:</strong> {displayedTargetTotal} {group.targetUnit?.toLowerCase()}</p><p><strong>Remaining:</strong> {targetRemaining} {group.targetUnit?.toLowerCase()}</p><div className="community-progress-heading"><strong>Progress: {group.targetProgressPercent ?? 0}%</strong></div><progress max="100" value={group.targetProgressPercent ?? 0} /></div>}
     <h2>Collected by item type</h2>
     {group.totals.length ? <ul className="community-totals">{group.totals.map((total) => <li key={`${total.category}-${total.unit}`}><strong>{total.quantity} {total.unit.toLowerCase()}</strong> {total.category.replace(/_/g, " ").toLowerCase()}</li>)}</ul> : <p>No food contributed yet.</p>}
     <p>{group.contributorCount} contributing household{group.contributorCount === 1 ? "" : "s"}</p>
+    <LocationMap points={mapPoints} title="Community collection pickup" />
+    <ol className="community-journey"><li>Community collection</li><li>Matching suggestion</li><li>Recipient coordination</li><li>Delivery tracking unavailable</li></ol>
     <h2>Contributions</h2>
     {group.contributions.length ? <div className="community-contribution-list">{group.contributions.map((contribution) => <article key={contribution.id} className="community-contribution">
       <div><strong>{contribution.foodName}</strong><p>{contribution.quantity} {contribution.unit.toLowerCase()} · {contribution.category.replace(/_/g, " ").toLowerCase()}</p><p>Use by {new Date(contribution.expiresAt).toLocaleString()}</p>

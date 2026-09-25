@@ -21,6 +21,7 @@ import { DonationMatchesPage } from "../features/matching/DonationMatchesPage";
 import { RecipientMatchesPage } from "../features/matching/RecipientMatchesPage";
 import { CommunityDonationMatchesPage } from "../features/matching/CommunityDonationMatchesPage";
 import { MatchDetailsPage } from "../features/matching/MatchDetailsPage";
+import { DashboardPage } from "../features/DashboardPage";
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -28,6 +29,7 @@ export default function App() {
     <div className="app-shell">
       <header className="site-header">
         <Link className="brand" to="/">Surplus <span>to Shelter</span></Link>
+        {user && <Link to="/dashboard">Dashboard</Link>}
         {user?.role === "DONOR" && <Link to="/donations">My donations</Link>}
         {user && <Link to="/community-donations">Community donations</Link>}
         {user && ["DONOR", "DRIVER", "ADMIN"].includes(user.role) && <Link to="/recipients">Recipients</Link>}
@@ -41,7 +43,8 @@ export default function App() {
       </header>
       <main>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={user ? <DashboardPage /> : <HomePage />} />
+          <Route path="/dashboard" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]}><DashboardPage /></ProtectedRoute>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/account" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]}><AccountPage /></ProtectedRoute>} />

@@ -120,7 +120,7 @@ export function evaluateMatch(source: MatchableFood, recipient: MatchableRecipie
       capacityQuantity: recipient.capacityQuantity, capacityUnit: recipient.capacityUnit,
       verificationStatus: recipient.verificationStatus,
     },
-    distanceKm: distanceKm === null ? null : Math.round(distanceKm),
+    distanceKm: distanceKm === null ? null : Math.round(distanceKm * 10) / 10,
     locationCompatibility, quantityCompatibility, hoursUntilExpiry: Math.round(hoursUntilExpiry * 100) / 100,
     reasons: [...problems, ...reasons], warnings: [...new Set(warnings)], suggestionOnly: true,
   });

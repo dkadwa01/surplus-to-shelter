@@ -11,8 +11,8 @@ import { ApiError } from "../../shared/api-error.js";
 
 const now = () => new Date();
 const activeStatuses = ["OPEN", "TARGET_REACHED"];
-const groupInclude = { contributions: { where: { status: "ACTIVE" }, orderBy: { createdAt: "desc" }, take: 200 } } as const;
-type GroupWithContributions = Prisma.CommunityDonationGetPayload<{ include: typeof groupInclude }>;
+const groupInclude = () => ({ contributions: { where: { status: "ACTIVE", expiresAt: { gt: new Date() } }, orderBy: { createdAt: "desc" as const }, take: 200 } });
+type GroupWithContributions = Prisma.CommunityDonationGetPayload<{ include: { contributions: true } }>;
 
 async function expireDueGroups(database: typeof prisma | Prisma.TransactionClient = prisma) {
   await database.communityDonation.updateMany({ where: { status: { in: activeStatuses }, deadline: { lte: now() } }, data: { status: "EXPIRED" } });
@@ -21,21 +21,24 @@ async function expireDueGroups(database: typeof prisma | Prisma.TransactionClien
 async function groupResponse(group: GroupWithContributions, userId: string) {
   const [aggregate, contributors] = await Promise.all([
     prisma.communityContribution.groupBy({
-      by: ["category", "unit"], where: { communityDonationId: group.id, status: "ACTIVE" },
+      by: ["category", "unit"], where: { communityDonationId: group.id, status: "ACTIVE", expiresAt: { gt: new Date() } },
       _sum: { quantity: true },
     }),
-    prisma.communityContribution.findMany({ where: { communityDonationId: group.id, status: "ACTIVE" }, select: { contributorId: true }, distinct: ["contributorId"] }),
+    prisma.communityContribution.findMany({ where: { communityDonationId: group.id, status: "ACTIVE", expiresAt: { gt: new Date() } }, select: { contributorId: true }, distinct: ["contributorId"] }),
   ]);
   const totals = aggregate.map((row) => ({ category: row.category, unit: row.unit, quantity: row._sum.quantity ?? 0 }));
-  const targetTotal = group.targetCategory && group.targetUnit
-    ? totals.find((total) => total.category === group.targetCategory && total.unit === group.targetUnit)?.quantity ?? 0
-    : null;
+  const matchingCategoryTotals = group.targetCategory ? totals.filter((total) => total.category === group.targetCategory) : [];
+  const targetTotal = group.targetUnit === "KG"
+    ? matchingCategoryTotals.reduce((sum, total) => sum + (total.unit === "KG" ? total.quantity : total.unit === "GRAMS" ? total.quantity / 1000 : 0), 0)
+    : group.targetUnit === "GRAMS"
+      ? matchingCategoryTotals.reduce((sum, total) => sum + (total.unit === "GRAMS" ? total.quantity : total.unit === "KG" ? total.quantity * 1000 : 0), 0)
+      : group.targetUnit ? matchingCategoryTotals.find((total) => total.unit === group.targetUnit)?.quantity ?? 0 : null;
   return CommunityDonationResponseSchema.parse({
     id: group.id, title: group.title, description: group.description, pickupArea: group.pickupArea,
     latitude: group.latitude, longitude: group.longitude, targetQuantity: group.targetQuantity,
     targetCategory: group.targetCategory, targetUnit: group.targetUnit, deadline: group.deadline.toISOString(),
     status: group.status, totals,
-    targetProgressPercent: targetTotal === null || !group.targetQuantity ? null : Math.min(100, Math.round((targetTotal / group.targetQuantity) * 100)),
+    targetProgressPercent: targetTotal === null || !group.targetQuantity ? null : Math.min(100, Math.max(0, Math.round((targetTotal / group.targetQuantity) * 100))),
     contributorCount: contributors.length,
     contributions: group.contributions.map((contribution) => ({
       id: contribution.id, foodName: contribution.foodName, category: contribution.category,
@@ -64,7 +67,7 @@ export async function createCommunityDonation(creatorId: string, fields: CreateC
     creatorId, title: fields.title, description: fields.description ?? null, pickupArea: fields.pickupArea,
     latitude: fields.latitude ?? null, longitude: fields.longitude ?? null, deadline: new Date(fields.deadline),
     targetQuantity: fields.targetQuantity ?? null, targetCategory: fields.targetCategory ?? null, targetUnit: fields.targetUnit ?? null,
-  }, include: groupInclude });
+  }, include: groupInclude() });
   return groupResponse(group, creatorId);
 }
 
@@ -79,7 +82,7 @@ export async function listCommunityDonations(userId: string, filters: { status?:
 
 export async function getCommunityDonation(id: string, userId: string) {
   await expireDueGroups();
-  const group = await prisma.communityDonation.findUnique({ where: { id }, include: groupInclude });
+  const group = await prisma.communityDonation.findUnique({ where: { id }, include: groupInclude() });
   if (!group) throw new ApiError(404, "NOT_FOUND", "Community donation not found.");
   return groupResponse(group, userId);
 }
@@ -96,10 +99,15 @@ async function belowThreshold(database: typeof prisma | Prisma.TransactionClient
 
 async function maybeReachTarget(database: Prisma.TransactionClient, group: { id: string; status: string; targetQuantity: number | null; targetCategory: string | null; targetUnit: string | null }) {
   if (!group.targetQuantity || !group.targetCategory || !group.targetUnit || group.status !== "OPEN") return;
-  const totals = await database.communityContribution.aggregate({
-    where: { communityDonationId: group.id, status: "ACTIVE", category: group.targetCategory, unit: group.targetUnit }, _sum: { quantity: true },
+  const totals = await database.communityContribution.groupBy({
+    by: ["unit"], where: { communityDonationId: group.id, status: "ACTIVE", expiresAt: { gt: new Date() }, category: group.targetCategory }, _sum: { quantity: true },
   });
-  if ((totals._sum.quantity ?? 0) >= group.targetQuantity) {
+  const current = group.targetUnit === "KG"
+    ? totals.reduce((sum, total) => sum + (total.unit === "KG" ? total._sum.quantity ?? 0 : total.unit === "GRAMS" ? (total._sum.quantity ?? 0) / 1000 : 0), 0)
+    : group.targetUnit === "GRAMS"
+      ? totals.reduce((sum, total) => sum + (total.unit === "GRAMS" ? total._sum.quantity ?? 0 : total.unit === "KG" ? (total._sum.quantity ?? 0) * 1000 : 0), 0)
+      : totals.find((total) => total.unit === group.targetUnit)?._sum.quantity ?? 0;
+  if (current >= group.targetQuantity) {
     await database.communityDonation.updateMany({ where: { id: group.id, status: "OPEN" }, data: { status: "TARGET_REACHED" } });
   }
 }

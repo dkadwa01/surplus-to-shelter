@@ -24,4 +24,4 @@ Scores are server-calculated. Lists sort by score descending, then earliest expi
 
 ## Privacy and current limits
 
-The API does not return donor IDs/names, pickup street addresses, recipient account contacts, or exact coordinates. It returns the service/pickup area and straight-line distance rounded to the nearest kilometer. It does not model recipient demand beyond accepted categories and capacity, interpret free-text dietary preferences, estimate road travel time, or account for driver availability. Those inputs or workflows should be added only with their own validated data and allocation rules.
+The API does not return donor IDs/names, pickup street addresses, recipient account contacts, or exact coordinates. It returns the service/pickup area and straight-line distance rounded to one decimal kilometer. It does not model recipient demand beyond accepted categories and capacity, interpret free-text dietary preferences, estimate road travel time, or account for driver availability. Those inputs or workflows should be added only with their own validated data and allocation rules.

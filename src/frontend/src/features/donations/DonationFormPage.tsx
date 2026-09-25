@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { DonationFieldsSchema, type DonationFields } from "@surplus/shared";
 import { createDonation, getDonation, updateDonation } from "./donation-api";
+import { LocationSearch } from "../../components/LocationSearch";
 
 const blank: DonationFields = { foodName: "", category: "PREPARED_MEALS", quantity: 1, unit: "SERVINGS", expiresAt: "", pickupAddress: "", pickupArea: "" };
 function localInput(value?: string | null) {
@@ -27,9 +28,8 @@ export function DonationFormPage() {
       <div className="donation-fields-row"><label>Quantity<input type="number" min="0.01" max="100000" step="any" required value={fields.quantity} onChange={(e) => set("quantity", Number(e.target.value))} /></label><label>Unit<select value={fields.unit} onChange={(e) => set("unit", e.target.value as DonationFields["unit"])}>{["SERVINGS","KG","GRAMS","LITRES","ITEMS","PACKAGES"].map((unit) => <option key={unit}>{unit}</option>)}</select></label></div>
       <label>Prepared at (optional)<input type="datetime-local" value={localInput(fields.preparedAt)} onChange={(e) => set("preparedAt", e.target.value ? new Date(e.target.value).toISOString() : undefined)} /></label>
       <label>Use by<input type="datetime-local" required value={localInput(fields.expiresAt)} onChange={(e) => set("expiresAt", e.target.value)} /></label>
-      <label>Pickup address<input required value={fields.pickupAddress} onChange={(e) => set("pickupAddress", e.target.value)} /></label>
+      <LocationSearch title="Search pickup location" markerType="DONATION" value={fields.pickupAddress} latitude={fields.latitude} longitude={fields.longitude} onAddressChange={(address) => setFields((current) => ({ ...current, pickupAddress: address, latitude: undefined, longitude: undefined }))} onSelect={(location) => setFields((current) => ({ ...current, pickupAddress: location.address, pickupArea: location.area || current.pickupArea, latitude: location.latitude, longitude: location.longitude }))} />
       <label>Area / neighborhood<input required value={fields.pickupArea} onChange={(e) => set("pickupArea", e.target.value)} /></label>
-      <div className="donation-fields-row"><label>Latitude (optional)<input type="number" min="-90" max="90" step="any" value={fields.latitude ?? ""} onChange={(e) => set("latitude", e.target.value ? Number(e.target.value) : undefined)} /></label><label>Longitude (optional)<input type="number" min="-180" max="180" step="any" value={fields.longitude ?? ""} onChange={(e) => set("longitude", e.target.value ? Number(e.target.value) : undefined)} /></label></div>
       <label>Description (optional)<textarea rows={3} maxLength={1000} value={fields.description ?? ""} onChange={(e) => set("description", e.target.value || undefined)} /></label>
       {error && <p className="form-error" role="alert">{error}</p>}<div className="form-actions"><Link to={id ? `/donations/${id}` : "/donations"}>Back</Link><button className="primary-button" disabled={busy}>{busy ? "Saving…" : editing ? "Save changes" : "Publish donation"}</button></div>
     </form>

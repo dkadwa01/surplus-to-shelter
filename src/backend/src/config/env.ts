@@ -9,6 +9,7 @@ const EnvironmentSchema = z.object({
   DATABASE_URL: z.string().min(1),
   PORT: z.coerce.number().int().positive().default(4000),
   FRONTEND_ORIGIN: z.string().url().default("http://localhost:5173"),
+  LOCATION_SEARCH_URL: z.string().url().default("https://nominatim.openstreetmap.org/search"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 
