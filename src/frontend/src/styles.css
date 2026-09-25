@@ -121,6 +121,14 @@ h1 { margin: 18px 0; font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.02; let
 .community-organizer-actions h2 { flex-basis: 100%; margin: 0; }
 .status-target_reached { background: #edf1d9; color: #5c6723; }
 .matching-page { display: grid; gap: 16px; }
+.dispatch-panel, .dispatch-card { padding: 22px; border: 1px solid #dce8de; border-radius: 16px; background: #fff; box-shadow: 0 14px 44px #2948360b; }
+.dispatch-panel h2 { margin-top: 0; }
+.dispatch-list { display: grid; gap: 14px; }
+.dispatch-card h3 { margin: 16px 0 8px; }
+.dispatch-card p { color: var(--muted); line-height: 1.5; }
+.dispatch-route { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 10px 0; }
+.status-busy, .status-accepted, .status-pickup_started, .status-picked_up, .status-in_transit { background: #edf1d9; color: #5c6723; }
+.status-delivered { background: #e6f1e8; color: #315e43; }
 .matching-page h1 { margin: 0; font-size: clamp(2.1rem, 6vw, 3.4rem); }
 .matching-list { display: grid; gap: 15px; }
 .match-card { padding: 22px; border: 1px solid #e1e9df; border-radius: 17px; background: #fff; box-shadow: 0 14px 44px #2948360b; }
@@ -150,3 +158,4 @@ footer { text-align: center; padding: 24px; }
 @media (max-width: 560px) { .recipient-profile-head { flex-direction: column; } .recipient-profile-view dl { grid-template-columns: 1fr; gap: 5px; } .recipient-profile-view dd { margin-bottom: 10px; } }
 @media (max-width: 560px) { .community-filters, .community-contribution { align-items: stretch; flex-direction: column; } }
 @media (max-width: 560px) { .match-pair-grid { grid-template-columns: 1fr; } .match-card-foot { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 560px) { .dispatch-route { grid-template-columns: 1fr; gap: 4px; } }

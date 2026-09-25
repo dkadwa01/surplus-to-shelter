@@ -21,6 +21,8 @@ import { DonationMatchesPage } from "../features/matching/DonationMatchesPage";
 import { RecipientMatchesPage } from "../features/matching/RecipientMatchesPage";
 import { CommunityDonationMatchesPage } from "../features/matching/CommunityDonationMatchesPage";
 import { MatchDetailsPage } from "../features/matching/MatchDetailsPage";
+import { DriverDashboard } from "../features/dispatch/DriverDashboard";
+import { DispatchAssignmentsPage } from "../features/dispatch/DispatchAssignmentsPage";
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -33,6 +35,8 @@ export default function App() {
         {user && ["DONOR", "DRIVER", "ADMIN"].includes(user.role) && <Link to="/recipients">Recipients</Link>}
         {user?.role === "RECIPIENT" && <Link to="/recipients/profile">Recipient profile</Link>}
         {user?.role === "RECIPIENT" && <Link to="/matching">Food matches</Link>}
+        {user?.role === "DRIVER" && <Link to="/dispatch">Driver workspace</Link>}
+        {user && ["DONOR", "RECIPIENT", "ADMIN"].includes(user.role) && <Link to="/dispatch">Dispatch</Link>}
         {user && ["DONOR", "RECIPIENT", "DRIVER"].includes(user.role) && <Link to="/verification">Verification</Link>}
         {user?.role === "ADMIN" && <Link to="/admin/verifications">Verification review</Link>}
         <nav className="header-nav" aria-label="Account navigation">
@@ -55,6 +59,7 @@ export default function App() {
           <Route path="/matching/donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationMatchesPage /></ProtectedRoute>} />
           <Route path="/matching/community-donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><CommunityDonationMatchesPage /></ProtectedRoute>} />
           <Route path="/matching/details/:sourceType/:sourceId/recipients/:recipientProfileId" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT"]}><MatchDetailsPage /></ProtectedRoute>} />
+          <Route path="/dispatch" element={user?.role === "DRIVER" ? <ProtectedRoute allowedRoles={["DRIVER"]}><DriverDashboard /></ProtectedRoute> : <ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "ADMIN"]}><DispatchAssignmentsPage /></ProtectedRoute>} />
           <Route path="/recipients" element={<ProtectedRoute allowedRoles={["DONOR", "DRIVER", "ADMIN"]}><RecipientsPage /></ProtectedRoute>} />
           <Route path="/recipients/profile" element={<ProtectedRoute allowedRoles={["RECIPIENT"]}><RecipientProfilePage /></ProtectedRoute>} />
           <Route path="/verification" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER"]}><VerificationPage role={user?.role ?? "DONOR"} donorType={user?.donorType ?? null} /></ProtectedRoute>} />

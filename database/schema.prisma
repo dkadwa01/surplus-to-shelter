@@ -25,6 +25,9 @@ model User {
   verificationReviews VerificationRecord[] @relation("VerificationReviewer")
   organizedCommunityDonations CommunityDonation[] @relation("CommunityOrganizer")
   communityContributions CommunityContribution[] @relation("CommunityContributor")
+  driverProfile DriverProfile?
+  dispatchesCreated DispatchAssignment[] @relation("DispatchCreator")
+  dispatchesDriven DispatchAssignment[] @relation("DispatchDriver")
 }
 
 model AuthSession {
@@ -56,6 +59,7 @@ model Donation {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   donor          User     @relation(fields: [donorId], references: [id], onDelete: Restrict)
+  dispatchAssignment DispatchAssignment?
 
   @@index([donorId, status, createdAt])
   @@index([status, category, expiresAt])
@@ -84,6 +88,7 @@ model RecipientProfile {
   updatedAt               DateTime @updatedAt
   user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   acceptedCategories      RecipientFoodCategory[]
+  dispatchAssignments DispatchAssignment[]
 
   @@index([verificationStatus, isActive, isAcceptingDonations])
   @@index([recipientType, serviceArea])
@@ -151,6 +156,7 @@ model CommunityDonation {
   updatedAt      DateTime @updatedAt
   creator        User     @relation("CommunityOrganizer", fields: [creatorId], references: [id], onDelete: Restrict)
   contributions  CommunityContribution[]
+  dispatchAssignments DispatchAssignment[]
 
   @@index([status, pickupArea, deadline])
   @@index([creatorId, status, createdAt])
@@ -173,10 +179,58 @@ model CommunityContribution {
   updatedAt                DateTime @updatedAt
   communityDonation        CommunityDonation @relation(fields: [communityDonationId], references: [id], onDelete: Restrict)
   contributor              User     @relation("CommunityContributor", fields: [contributorId], references: [id], onDelete: Restrict)
+  dispatchAssignment DispatchAssignment?
 
   @@index([communityDonationId, status, createdAt])
   @@index([contributorId, status, createdAt])
   @@index([category, unit, status])
+}
+
+model DriverProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  vehicleType     String
+  capacityQuantity Float
+  capacityUnit    String
+  serviceArea     String
+  serviceRadiusKm Float?
+  latitude        Float?
+  longitude       Float?
+  availability    String   @default("OFFLINE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([availability, serviceArea])
+}
+
+model DispatchAssignment {
+  id                    String   @id @default(cuid())
+  donationId            String?  @unique
+  communityContributionId String? @unique
+  communityDonationId   String?
+  recipientProfileId    String
+  createdById           String
+  assignedDriverId      String?
+  status                String   @default("AVAILABLE")
+  pickupStartedAt       DateTime?
+  pickedUpAt            DateTime?
+  transitStartedAt      DateTime?
+  deliveredAt           DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  donation              Donation? @relation(fields: [donationId], references: [id], onDelete: Restrict)
+  communityContribution CommunityContribution? @relation(fields: [communityContributionId], references: [id], onDelete: Restrict)
+  communityDonation     CommunityDonation? @relation(fields: [communityDonationId], references: [id], onDelete: Restrict)
+  recipientProfile      RecipientProfile @relation(fields: [recipientProfileId], references: [id], onDelete: Restrict)
+  createdBy             User @relation("DispatchCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assignedDriver        User? @relation("DispatchDriver", fields: [assignedDriverId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([assignedDriverId, status])
+  @@index([recipientProfileId, status])
 }
 
 // Admin-managed individual-post thresholds. Collective contributions remain

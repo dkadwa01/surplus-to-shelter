@@ -80,3 +80,27 @@ Matching routes require the existing session cookie and calculate suggestions on
 | `GET` | `/api/matching/details/:sourceType/:sourceId/recipients/:recipientProfileId` | Donor source owner or recipient profile owner | One pair's eligibility, factor scores, reasons, and warnings. A known but incompatible pair can return `eligible: false`. Unverified/inactive recipient profiles are hidden as `404`. |
 
 Candidate lists contain only eligible pairs and are capped at 100 direct donations, 1,000 community contribution items, or 100 recipient profiles per request. Responses omit donor identity, street addresses, recipient contact details, and exact coordinates. Distance is rounded to the nearest kilometer and is straight-line distance, not a route estimate. An unavailable/expired individual donation returns `409`; a community collection must be `TARGET_REACHED` or `CLOSED`.
+
+## Driver dispatch
+
+Dispatch uses existing accounts, latest verification requests, food sources, recipient profiles, and the matching evaluator. Matches remain transient; dispatch creation reruns eligibility and reserves the selected source transactionally. Community dispatch references one contribution at a time.
+
+| Method | Path | Access | Result |
+| --- | --- | --- | --- |
+| `GET` | `/api/dispatch/drivers/me` | Driver | Own driver profile and current verification state. |
+| `PUT` | `/api/dispatch/drivers/profile` | Driver | Creates/updates vehicle capacity and service-area details. |
+| `PATCH` | `/api/dispatch/drivers/availability` | Driver | Sets `AVAILABLE` or `OFFLINE`; becoming available requires current verification. `BUSY` is backend-managed. |
+| `POST` | `/api/dispatch` | Verified donor | Body: `sourceType`, `sourceId`, `recipientProfileId`. Rechecks the match and reserves the owned donation or organizer's community contribution. |
+| `GET` | `/api/dispatch/available` | Verified driver | Suitable assignments filtered by capacity/unit and service area/radius. |
+| `GET` | `/api/dispatch/mine` | Signed-in participant | Assignments created by the donor, assigned to the driver, or addressed to the recipient profile. Admins can view all. |
+| `GET` | `/api/dispatch/:id` | Related participant, suitable verified driver, admin | Authorized assignment details; unrelated IDs return `404`. |
+| `POST` | `/api/dispatch/:id/accept` | Verified driver | Atomically claims the assignment and sets availability to `BUSY`. |
+| `POST` | `/api/dispatch/:id/decline` | Assigned driver | Returns an accepted, not-yet-started assignment to the available pool. |
+| `POST` | `/api/dispatch/:id/pickup/start` | Assigned driver | `ACCEPTED -> PICKUP_STARTED`. |
+| `POST` | `/api/dispatch/:id/pickup/confirm` | Assigned driver | `PICKUP_STARTED -> PICKED_UP`, recording pickup time. |
+| `POST` | `/api/dispatch/:id/transit/start` | Assigned driver | `PICKED_UP -> IN_TRANSIT`. |
+| `POST` | `/api/dispatch/:id/delivery/confirm` | Assigned driver | `IN_TRANSIT -> DELIVERED`, recording delivery time and marking the source delivered. |
+| `POST` | `/api/dispatch/:id/complete` | Assigned driver | `DELIVERED -> COMPLETED`; driver availability returns to `AVAILABLE`. |
+| `POST` | `/api/dispatch/:id/cancel` | Assignment creator, admin | Cancels before pickup and releases an unexpired source. |
+
+Client-supplied owner, driver, and lifecycle values are ignored. Addresses are visible only to related participants and suitable verified drivers. Distance is rounded straight-line distance, not a route estimate. Expired food cannot be picked up or confirmed delivered.

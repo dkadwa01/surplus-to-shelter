@@ -2,7 +2,7 @@ import { z } from "zod";
 import { FoodCategorySchema, futureDateTime, QuantityUnitSchema } from "./donation.js";
 
 export const CommunityDonationStatusSchema = z.enum(["OPEN", "TARGET_REACHED", "CLOSED", "CANCELLED", "EXPIRED"]);
-export const CommunityContributionStatusSchema = z.enum(["ACTIVE", "WITHDRAWN"]);
+export const CommunityContributionStatusSchema = z.enum(["ACTIVE", "RESERVED", "DELIVERED", "WITHDRAWN"]);
 
 export const CreateCommunityDonationRequestSchema = z.object({
   title: z.string().trim().min(3).max(120),

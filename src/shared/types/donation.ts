@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const FoodCategorySchema = z.enum(["PREPARED_MEALS", "PRODUCE", "BAKERY", "DAIRY", "GRAINS", "PROTEIN", "OTHER"]);
 export const QuantityUnitSchema = z.enum(["SERVINGS", "KG", "GRAMS", "LITRES", "ITEMS", "PACKAGES"]);
-export const DonationStatusSchema = z.enum(["AVAILABLE", "CANCELLED", "EXPIRED"]);
+export const DonationStatusSchema = z.enum(["AVAILABLE", "RESERVED", "DELIVERED", "CANCELLED", "EXPIRED"]);
 export const futureDateTime = z.string().datetime({ offset: true }).refine((value) => Date.parse(value) > Date.now(), "Use-by time must be in the future.");
 
 export const DonationFieldsSchema = z.object({
