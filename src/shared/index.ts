@@ -9,3 +9,4 @@ export * from "./types/recipient.js";
 export * from "./types/verification.js";
 export * from "./types/community-donation.js";
 export * from "./types/matching.js";
+export * from "./types/dispatch.js";

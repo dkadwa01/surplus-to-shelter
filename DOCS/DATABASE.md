@@ -38,4 +38,12 @@ Current donation statuses: `AVAILABLE`, `CANCELLED`, `EXPIRED`. Reservation, pic
 
 ## Matching
 
-Matching uses the existing `Donation`, `RecipientProfile`, `RecipientFoodCategory`, `CommunityDonation`, `CommunityContribution`, and `VerificationRequest` records. It does not create match/assignment rows or decrement quantities. Individual sources must be `AVAILABLE` and unexpired. Community items are considered separately only when the group is `TARGET_REACHED` or `CLOSED`, the contribution remains `ACTIVE` and unexpired, and the contributor's latest verification is `VERIFIED`. Results are suggestions only until a later allocation workflow exists.
+Matching uses the existing `Donation`, `RecipientProfile`, `RecipientFoodCategory`, `CommunityDonation`, `CommunityContribution`, and `VerificationRequest` records. It does not persist suggestions. Individual sources must be `AVAILABLE` and unexpired. Community items are considered separately only when the group is `TARGET_REACHED` or `CLOSED`, the contribution remains `ACTIVE` and unexpired, and the contributor's latest verification is `VERIFIED`.
+
+## Driver dispatch
+
+- `DriverProfile` is a minimal one-to-one extension of a `DRIVER` user for vehicle capacity, service area/radius, optional coordinates, and backend-controlled availability (`OFFLINE`, `AVAILABLE`, `BUSY`). Verification remains in `VerificationRequest`.
+- `DispatchAssignment` references one individual `Donation` or one `CommunityContribution`, a matched `RecipientProfile`, the creating user, and an optional assigned driver. Unique source foreign keys prevent multiple assignments per food source; a cancelled assignment can be reopened after releasing its source.
+- Creating an assignment reruns the existing matching evaluator, then conditionally changes `Donation.AVAILABLE -> RESERVED` or `CommunityContribution.ACTIVE -> RESERVED` in the assignment transaction. Concurrent second reservations fail. No duplicate food record is created.
+- Delivery changes the source to `DELIVERED`; pre-pickup cancellation restores an unexpired source to `AVAILABLE`/`ACTIVE`, otherwise it becomes `EXPIRED`/`WITHDRAWN`. Dispatch timestamps record pickup, transit, delivery, completion, and cancellation milestones.
+- Accepting a driver atomically sets the assignment to `ACCEPTED`, associates the driver from the session, and marks the profile `BUSY`. Only that driver may progress transport states; completion returns the profile to `AVAILABLE`.
