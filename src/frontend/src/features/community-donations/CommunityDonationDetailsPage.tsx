@@ -60,6 +60,7 @@ export function CommunityDonationDetailsPage() {
     <div className="donation-card-top"><span className={`status-pill status-${group.status.toLowerCase()}`}>{group.status.replace(/_/g, " ")}</span><span>{group.pickupArea}</span></div>
     <h1>{group.title}</h1><p className="auth-description">{group.description || "A neighborhood food collection."}</p>
     <p>Collection deadline: {new Date(group.deadline).toLocaleString()}</p>
+    {group.isOrganizer && ["TARGET_REACHED", "CLOSED"].includes(group.status) && <p><Link className="secondary-button" to={`/matching/community-donations/${group.id}`}>Find recipient matches</Link></p>}
     {group.targetQuantity && <div className="community-progress"><div><strong>{group.targetProgressPercent}%</strong><span> of {group.targetQuantity} {group.targetUnit?.toLowerCase()} {group.targetCategory?.replace(/_/g, " ").toLowerCase()}</span></div><progress max="100" value={group.targetProgressPercent ?? 0} /></div>}
     <h2>Collected by item type</h2>
     {group.totals.length ? <ul className="community-totals">{group.totals.map((total) => <li key={`${total.category}-${total.unit}`}><strong>{total.quantity} {total.unit.toLowerCase()}</strong> {total.category.replace(/_/g, " ").toLowerCase()}</li>)}</ul> : <p>No food contributed yet.</p>}

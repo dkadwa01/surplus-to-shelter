@@ -8,6 +8,7 @@ import { donationRouter } from "./modules/donations/donation.routes.js";
 import { recipientRouter } from "./modules/recipients/recipient.routes.js";
 import { verificationRouter } from "./modules/verification/verification.routes.js";
 import { communityDonationRouter } from "./modules/community-donations/community-donation.routes.js";
+import { matchingRouter } from "./modules/matching/matching.routes.js";
 import { errorHandler } from "./shared/error-handler.js";
 
 export const app = express();
@@ -21,4 +22,5 @@ app.use("/api/donations", donationRouter);
 app.use("/api/recipients", recipientRouter);
 app.use("/api/verification", verificationRouter);
 app.use("/api/community-donations", communityDonationRouter);
+app.use("/api/matching", matchingRouter);
 app.use(errorHandler);

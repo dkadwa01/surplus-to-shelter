@@ -17,6 +17,10 @@ import { AdminVerificationListPage } from "../features/verification/AdminVerific
 import { AdminVerificationDetailPage } from "../features/verification/AdminVerificationDetailPage";
 import { CommunityDonationsPage } from "../features/community-donations/CommunityDonationsPage";
 import { CommunityDonationDetailsPage } from "../features/community-donations/CommunityDonationDetailsPage";
+import { DonationMatchesPage } from "../features/matching/DonationMatchesPage";
+import { RecipientMatchesPage } from "../features/matching/RecipientMatchesPage";
+import { CommunityDonationMatchesPage } from "../features/matching/CommunityDonationMatchesPage";
+import { MatchDetailsPage } from "../features/matching/MatchDetailsPage";
 
 export default function App() {
   const { user, loading, logout } = useAuth();
@@ -28,6 +32,7 @@ export default function App() {
         {user && <Link to="/community-donations">Community donations</Link>}
         {user && ["DONOR", "DRIVER", "ADMIN"].includes(user.role) && <Link to="/recipients">Recipients</Link>}
         {user?.role === "RECIPIENT" && <Link to="/recipients/profile">Recipient profile</Link>}
+        {user?.role === "RECIPIENT" && <Link to="/matching">Food matches</Link>}
         {user && ["DONOR", "RECIPIENT", "DRIVER"].includes(user.role) && <Link to="/verification">Verification</Link>}
         {user?.role === "ADMIN" && <Link to="/admin/verifications">Verification review</Link>}
         <nav className="header-nav" aria-label="Account navigation">
@@ -46,6 +51,10 @@ export default function App() {
           <Route path="/donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationDetailsPage /></ProtectedRoute>} />
           <Route path="/community-donations" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]}><CommunityDonationsPage /></ProtectedRoute>} />
           <Route path="/community-donations/:id" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER", "ADMIN"]}><CommunityDonationDetailsPage /></ProtectedRoute>} />
+          <Route path="/matching" element={<ProtectedRoute allowedRoles={["RECIPIENT"]}><RecipientMatchesPage /></ProtectedRoute>} />
+          <Route path="/matching/donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><DonationMatchesPage /></ProtectedRoute>} />
+          <Route path="/matching/community-donations/:id" element={<ProtectedRoute allowedRoles={["DONOR"]}><CommunityDonationMatchesPage /></ProtectedRoute>} />
+          <Route path="/matching/details/:sourceType/:sourceId/recipients/:recipientProfileId" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT"]}><MatchDetailsPage /></ProtectedRoute>} />
           <Route path="/recipients" element={<ProtectedRoute allowedRoles={["DONOR", "DRIVER", "ADMIN"]}><RecipientsPage /></ProtectedRoute>} />
           <Route path="/recipients/profile" element={<ProtectedRoute allowedRoles={["RECIPIENT"]}><RecipientProfilePage /></ProtectedRoute>} />
           <Route path="/verification" element={<ProtectedRoute allowedRoles={["DONOR", "RECIPIENT", "DRIVER"]}><VerificationPage role={user?.role ?? "DONOR"} donorType={user?.donorType ?? null} /></ProtectedRoute>} />
